@@ -3,7 +3,10 @@ from Serach import Serach
 from Parser import Parser
 
 def print_solution(result, visited, path):
-    print(f'[FOUND_SOLUTION]: {result is not None}')
+    solution = 'no'
+    if result is not None:
+        solution = 'yes'
+    print(f'[FOUND_SOLUTION]: {solution}')
     print(f'[STATES_VISITED]: {len(visited)}')
     print(f'[PATH_LENGTH]: {len(path)}')
     print(f'[TOTAL_COST]: {result.depth}')

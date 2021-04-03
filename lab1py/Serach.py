@@ -1,4 +1,5 @@
 from State import State
+import queue
 
 class Serach:
     kind = ''
@@ -15,35 +16,32 @@ class Serach:
             raise NotImplementedError('Serach not implemented')
         
     def __serach(self, start_state, transition, final_state, insert_method):
-        visited = []
-        queue = {}
-        queue[0] = [State(start_state, 0)]
-        open_nodes = [State(start_state, 0)]        
+        visited = set()
+        q = {}
+        q[0] = [State(start_state, 0)]
+        open_nodes = queue.Queue()
+        open_nodes.put(State(start_state, 0))
 
         path_num = 0
-        while len(open_nodes):
-            node = open_nodes.pop(0)
-            path = queue[node.path]
+        while open_nodes.qsize():
+            node = open_nodes.get()
+            path = q[node.path]
 
-            if node.state not in visited:
-                visited.append(node.state)
+            visited.add(node.state)
         
             if node.state in final_state:
-                for i in queue:
-                    print(i)
-                    print(queue[i])
                 return (node, visited, path)            
                 
             exp = self.__deafult__expand(node, transition)
-            
             for s in exp:
                 if s.state not in visited:
                     path_num += 1
                     s.path = node.path = path_num
                     new_path = list(path)
-                    new_path = insert_method(new_path, s)
+                    #new_path = insert_method(new_path, s)
+                    new_path.append(s)
                     open_nodes = insert_method(open_nodes, s)
-                    queue[path_num] = new_path
+                    q[path_num] = new_path
         return (None, visited, None)
 
     @classmethod
@@ -58,12 +56,12 @@ class Serach:
 
     @classmethod
     def __BFS__insert(self, arr, node):
-        arr.append(node)
+        arr.put(node)
         return arr
 
     @classmethod
     def __UCS__insert(self, arr, node):
-        arr.append(node)
-        arr = sorted(arr, key=lambda x: x.depth)
+        arr.put(node)
+        arr.sort(key=lambda x: x.depth)
         return arr
 
