@@ -7,7 +7,11 @@ def print_solution(result, visited, path):
     print(f'[STATES_VISITED]: {len(visited)}')
     print(f'[PATH_LENGTH]: {len(path)}')
     print(f'[TOTAL_COST]: {result.depth}')
-    print(f'[PATH]: {path}')
+    
+    path_str = str(path.pop(0).state)
+    for p in path:
+        path_str += f' => {p.state}'
+    print(f'[PATH]: {path_str}')
 
 if __name__ == '__main__':
 

@@ -1,6 +1,7 @@
 class State:
     state = ''
     depth = ''
+    path = 0
 
     def __init__(self, state, depth):
         self.state = state

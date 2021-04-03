@@ -16,26 +16,34 @@ class Serach:
         
     def __serach(self, start_state, transition, final_state, insert_method):
         visited = []
-        open_nodes = []
-        open_nodes.append([State(start_state, 0)])
+        queue = {}
+        queue[0] = [State(start_state, 0)]
+        open_nodes = [State(start_state, 0)]        
 
+        path_num = 0
         while len(open_nodes):
-            path = open_nodes.pop(0)
-            node = path[-1]
+            node = open_nodes.pop(0)
+            path = queue[node.path]
 
             if node.state not in visited:
                 visited.append(node.state)
         
             if node.state in final_state:
+                for i in queue:
+                    print(i)
+                    print(queue[i])
                 return (node, visited, path)            
                 
             exp = self.__deafult__expand(node, transition)
             
             for s in exp:
                 if s.state not in visited:
+                    path_num += 1
+                    s.path = node.path = path_num
                     new_path = list(path)
-                    insert_method(new_path, s)
-                    open_nodes.append(new_path)
+                    new_path = insert_method(new_path, s)
+                    open_nodes = insert_method(open_nodes, s)
+                    queue[path_num] = new_path
         return (None, visited, None)
 
     @classmethod
@@ -51,11 +59,11 @@ class Serach:
     @classmethod
     def __BFS__insert(self, arr, node):
         arr.append(node)
+        return arr
 
     @classmethod
     def __UCS__insert(self, arr, node):
         arr.append(node)
-        print(arr)  
         arr = sorted(arr, key=lambda x: x.depth)
-        print(arr)
+        return arr
 
