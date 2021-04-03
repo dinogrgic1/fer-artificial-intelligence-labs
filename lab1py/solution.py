@@ -1,28 +1,10 @@
 import sys
-
-
-def parse_state_space_file():
-    pass
-
-def parse_args(args):
-    alg = ss = h = optimistic = consistent = None
-    flag = None
-    for arg in args:
-        if '--' in arg:
-            flag = arg
-        else:
-            if flag == '--alg':
-                alg = arg
-            elif flag == '--ss':
-                ss = arg
-            elif flag == '--h':
-                h = arg
-            elif flag == '--check-optimistic':
-                optimistic = arg
-            elif flag == '--check-consistent':
-                consistent = arg
-    return (alg, ss, h, optimistic, consistent)    
+from Parser import Parser
 
 if __name__ == '__main__':
-    alg, ss, h, optimistic, consistent = parse_args(sys.argv[1:])
-    print(alg, ss, h, optimistic, consistent)
+    try:
+        alg, ss, h, optimistic, consistent = Parser.parse_args(sys.argv[1:])
+        start_state, final_state, transition = Parser.parse_state_space_file(ss)
+        heuristics = Parser.parse_heuristic_value_file(h)
+    except Exception as e:
+        print(e)
