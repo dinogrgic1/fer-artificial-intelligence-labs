@@ -22,13 +22,26 @@ def check_optimistic(heuristics, final_state, transition):
     is_optimistic = 'is'
     for h in sorted(heuristics):
         is_ok = 'ERR'
-        hstar = Serach('bfs').search(h, transition, final_state, heuristics)[0].depth
+        hstar = Serach('ucs').search(h, transition, final_state, heuristics)[0].depth
         if heuristics[h] <= hstar:
             is_ok = 'OK'
         else:
             is_optimistic = 'is not'
-        print(f'[CONDITION]: [{is_ok}] h({h}) <= h*: {heuristics[h]} <= {hstar}')
+        print(f'[CONDITION]: [{is_ok}] h({h}) <= h*: {heuristics[h]} <= {float(hstar)}')
     print(f'[CONCLUSION]: Heuristic {is_optimistic} optimistic.')
+
+def check_consistent(heuristics, transition):
+    is_consistent = 'is'
+    for h1 in sorted(transition):
+        for h2 in transition[h1]:
+            is_ok = 'ERR'
+            if heuristics[h1] <= heuristics[h2.state] + h2.depth:
+                is_ok = 'OK'
+            else:
+                is_consistent = 'is not'
+            print(f'[CONDITION]: [{is_ok}] h({h1}) <= h({h2.state}) + c: {heuristics[h1]} <= {heuristics[h2.state]} + {h2.depth}')
+    print(f'[CONCLUSION]: Heuristic {is_consistent} consistent.')
+
 
 if __name__ == '__main__':
     alg, ss, h, optimistic, consistent = Parser.parse_args(sys.argv[1:])
@@ -48,4 +61,7 @@ if __name__ == '__main__':
 
     if optimistic is not None:
         check_optimistic(heuristics, final_state, transition)
+    
+    if consistent is not None:
+        check_consistent(heuristics, transition)
     
