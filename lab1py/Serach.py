@@ -1,5 +1,6 @@
 from State import State
 from collections import deque
+import heapq
 
 class Serach:
     kind = ''
@@ -9,36 +10,34 @@ class Serach:
 
     def search(self, start_state, transition, final_state, heuristic):
         if self.kind == 'bfs':
-            return self.__serach(start_state, transition, final_state, self.__deafult__expand, self.__BFS__insert, None)
+            return self.__serach(start_state, transition, final_state, self.__BFS__pop, self.__BFS__insert, self.__deafult__expand, None)
         elif self.kind == 'ucs':
-            return self.__serach(start_state, transition, final_state, self.__deafult__expand, self.__UCS__insert, None)
+            return self.__serach(start_state, transition, final_state, self.__priority__pop, self.__priority__insert, self.__deafult__expand, None)
         elif self.kind == 'astar':
-            return self.__serach(start_state, transition, final_state, self.__astar__expand, self.__ASTAR__insert, heuristic)
+            return self.__serach(start_state, transition, final_state, self.__priority__pop, self.__priority__insert, self.__astar__expand, heuristic)
         else:
             raise NotImplementedError('Serach not implemented')
         
-    def __serach(self, start_state, transition, final_state, expand, insert_method, heuristic):
+    def __serach(self, start_state, transition, final_state, pop, insert, expand, heuristic):
         visited = set()
         q = {}
         q[0] = [State(start_state, 0)]
         if heuristic != None:
             q[0][0].h = heuristic[start_state]
         
-        open_nodes = deque()
-        open_nodes.append(State(start_state, 0))
+        open_nodes = []
+        insert(open_nodes, State(start_state, 0))
         closed = set()
 
         path_num = 0
-        while open_nodes.count:
-            node = open_nodes.popleft()
+        while len(open_nodes):
+            node = pop(open_nodes)
             path = q[node.path]
             visited.add(node.state)
         
             if node.state in final_state:
                 return (node, visited, path)   
 
-            closed.add(node)
-            
             exp = expand(node, transition)
             for s in exp:
                 if s.state not in visited:
@@ -47,10 +46,11 @@ class Serach:
                         s.path = node.path = path_num
                         new_path = list(path)
                         new_path.append(s)
-                        open_nodes = insert_method(open_nodes, s)
+                        open_nodes = insert(open_nodes, s)
                         q[path_num] = new_path
 
                     else:
+                        closed.add(node)
                         m_s = self.__astar__condition(open_nodes, s) 
                         if m_s != None:
                             if (m_s.depth) < (s.depth):
@@ -70,7 +70,7 @@ class Serach:
                         s.path = node.path = path_num
                         new_path = list(path)
                         new_path.append(s)
-                        open_nodes = insert_method(open_nodes, s)
+                        open_nodes = insert(open_nodes, s)
                         q[path_num] = new_path
                         
         return (None, visited, None)
@@ -108,12 +108,14 @@ class Serach:
         return arr
 
     @classmethod
-    def __UCS__insert(self, arr, node):
-        arr.append(node)
-        return deque(sorted(arr, key=lambda x: x.depth))
+    def __BFS__pop(self, arr):
+        return arr.pop(0)
 
     @classmethod
-    def __ASTAR__insert(self, arr, node):
-        arr.append(node)
-        return deque(sorted(arr, key=lambda x: (x.depth + x.h)))
+    def __priority__insert(self, arr, node):
+        heapq.heappush(arr, node)
+        return arr
+
+    def __priority__pop(self, arr):
+        return heapq.heappop(arr)
 
