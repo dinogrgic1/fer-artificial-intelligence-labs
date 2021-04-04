@@ -18,18 +18,34 @@ def print_solution(result, visited, path):
     print(f'[PATH]: {path_str}')
     #print(path)
 
+def check_optimistic(heuristics, final_state, transition):
+    is_optimistic = 'is'
+    for h in sorted(heuristics):
+        is_ok = 'ERR'
+        hstar = Serach('bfs').search(h, transition, final_state, heuristics)[0].depth
+        if heuristics[h] <= hstar:
+            is_ok = 'OK'
+        else:
+            is_optimistic = 'is not'
+        print(f'[CONDITION]: [{is_ok}] h({h}) <= h*: {heuristics[h]} <= {hstar}')
+    print(f'[CONCLUSION]: Heuristic {is_optimistic} optimistic.')
+
 if __name__ == '__main__':
     alg, ss, h, optimistic, consistent = Parser.parse_args(sys.argv[1:])
     start_state, final_state, transition = Parser.parse_state_space_file(ss)
     if h is not None:
         heuristics = Parser.parse_heuristic_value_file(h)
-        
         for t in transition:
             for s in transition[t]:
                 s.h = heuristics[t]
     else:
         heuristics = None
 
-    s = Serach(alg)
-    result, visited, path = s.search(start_state, transition, final_state, heuristics)
-    print_solution(result, visited, path)
+    if alg is not None:
+        s = Serach(alg)
+        result, visited, path = s.search(start_state, transition, final_state, heuristics)
+        print_solution(result, visited, path)
+
+    if optimistic is not None:
+        check_optimistic(heuristics, final_state, transition)
+    

@@ -61,7 +61,7 @@ class Parser:
             if line[1] == '#':
                 continue
             strip = line.strip().split(":")
-            heuristics[strip[0]] = int(strip[1].strip())
+            heuristics[strip[0]] = float(strip[1].strip())
         heuristics_file.close()
         return heuristics
 
@@ -80,6 +80,10 @@ class Parser:
         for arg in args:
             if '--' in arg:
                 flag = arg
+                if flag == '--check-optimistic':
+                    optimistic = True
+                elif flag == '--check-consistent':
+                    consistent = True
             else:
                 if flag == '--alg':
                     alg = arg
@@ -87,8 +91,4 @@ class Parser:
                     ss = arg
                 elif flag == '--h':
                     h = arg
-                elif flag == '--check-optimistic':
-                    optimistic = arg
-                elif flag == '--check-consistent':
-                    consistent = arg
         return (alg, ss, h, optimistic, consistent)

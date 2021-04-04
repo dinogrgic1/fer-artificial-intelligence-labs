@@ -21,51 +21,58 @@ class Serach:
         visited = set()
         q = {}
         q[0] = [State(start_state, 0)]
+        if heuristic != None:
+            q[0][0].h = heuristic[start_state]
         
         open_nodes = deque()
         open_nodes.append(State(start_state, 0))
-        #closed = deque()
+        closed = set()
 
         path_num = 0
         while open_nodes.count:
             node = open_nodes.popleft()
             path = q[node.path]
-
             visited.add(node.state)
         
             if node.state in final_state:
-                return (node, visited, path)        
+                return (node, visited, path)   
+
+            closed.add(node)
+            
             exp = expand(node, transition)
-
             for s in exp:
-                #print(exp)
                 if s.state not in visited:
-                    #if heuristic == None:
-                    path_num += 1
-                    s.path = node.path = path_num
-                    new_path = list(path)
-                    new_path.append(s)
-                    open_nodes = insert_method(open_nodes, s, heuristic)
-                    q[path_num] = new_path
+                    if heuristic == None:
+                        path_num += 1
+                        s.path = node.path = path_num
+                        new_path = list(path)
+                        new_path.append(s)
+                        open_nodes = insert_method(open_nodes, s)
+                        q[path_num] = new_path
 
-                    # else:
-                    #     closed.append(node)
-                    #     union = deque(closed)
-                    #     union.extend(exp)
-
-                    #     m_s = self.__astar__condition(union, s) 
-                    #     if m_s == None:
-                    #         if heuristic(m_s) < heuristic(s):
-                    #             continue
-                    #         else:
-                    #             union.remove(m_s)
-                    #     path_num += 1
-                    #     s.path = node.path = path_num
-                    #     new_path = list(path)
-                    #     new_path.append(s)
-                    #     open_nodes = insert_method(open_nodes, s, heuristic)
-                    #     q[path_num] = new_path
-
+                    else:
+                        m_s = self.__astar__condition(open_nodes, s) 
+                        if m_s != None:
+                            if (m_s.depth) < (s.depth):
+                                continue
+                            else:
+                                open_nodes.remove(m_s)
+                                closed.remove(m_s)
+                        m_s = self.__astar__condition(closed, s) 
+                        if m_s != None:
+                            if (m_s.depth) < (s.depth):
+                                continue
+                            else:
+                                open_nodes.remove(m_s)
+                                closed.remove(m_s)
+                                                
+                        path_num += 1
+                        s.path = node.path = path_num
+                        new_path = list(path)
+                        new_path.append(s)
+                        open_nodes = insert_method(open_nodes, s)
+                        q[path_num] = new_path
+                        
         return (None, visited, None)
 
     @classmethod
@@ -96,17 +103,17 @@ class Serach:
         return ret
 
     @classmethod
-    def __BFS__insert(self, arr, node, heuristics):
+    def __BFS__insert(self, arr, node):
         arr.append(node)
         return arr
 
     @classmethod
-    def __UCS__insert(self, arr, node, heuristics):
+    def __UCS__insert(self, arr, node):
         arr.append(node)
         return deque(sorted(arr, key=lambda x: x.depth))
 
     @classmethod
-    def __ASTAR__insert(self, arr, node, heuristics):
+    def __ASTAR__insert(self, arr, node):
         arr.append(node)
         return deque(sorted(arr, key=lambda x: (x.depth + x.h)))
 

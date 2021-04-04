@@ -10,7 +10,7 @@ class State:
         self.h = h
     
     def __repr__(self):
-        return repr((self.state, self.depth, self.h))
+        return repr((self.state, self.depth, self.h, (self.depth + self.h)))
 
     def __str__(self):
         return f'({self.state}, {self.depth}, {self.h})'
