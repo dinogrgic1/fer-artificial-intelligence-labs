@@ -13,7 +13,7 @@ class State:
         return repr((self.state, self.depth, (self.depth + self.h)))
 
     def __str__(self):
-        return f'({self.state}, {self.depth}, {self.h})'
+        return f'({self.state}, {self.depth}, {self.depth + self.h})'
 
     def __lt__(self, other):
         return (self.depth + self.h) < (other.depth + other.h)

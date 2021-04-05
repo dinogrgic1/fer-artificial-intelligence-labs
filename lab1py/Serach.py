@@ -21,12 +21,14 @@ class Serach:
     def __serach(self, start_state, transition, final_state, pop, insert, expand, heuristic):
         visited = set()
         q = {}
-        q[0] = [State(start_state, 0)]
-        if heuristic != None:
-            q[0][0].h = heuristic[start_state]
         
+        start_node = State(start_state, 0)
+        if heuristic != None:
+            start_node.h = heuristic[start_state]
+        
+        q[0] = [start_node]
         open_nodes = []
-        insert(open_nodes, State(start_state, 0))
+        insert(open_nodes, start_node)
         closed = set()
 
         path_num = 0
@@ -50,44 +52,36 @@ class Serach:
                         q[path_num] = new_path
 
                     else:
-                        closed.add(node)
-                        m_s = self.__astar__condition(open_nodes, s) 
-                        if m_s != None:
-                            if (m_s.depth) < (s.depth):
-                                continue
+                        m_s = self.__astar__condition(open_nodes, s)
+                        m_s2 = self.__astar__condition(closed, s)
+                        if m_s == None and m_s2 == None:
+                            open_nodes = insert(open_nodes, s)
+                        else:
+                            if m_s2 != None:
+                                closed.remove(s)
+                                open_nodes = insert(open_nodes, s)
                             else:
-                                open_nodes.remove(m_s)
-                                closed.remove(m_s)
-                        m_s = self.__astar__condition(closed, s) 
-                        if m_s != None:
-                            if (m_s.depth) < (s.depth):
                                 continue
-                            else:
-                                open_nodes.remove(m_s)
-                                closed.remove(m_s)
-                                                
                         path_num += 1
                         s.path = node.path = path_num
                         new_path = list(path)
                         new_path.append(s)
                         open_nodes = insert(open_nodes, s)
                         q[path_num] = new_path
-                        
+            closed.add(node)
         return (None, visited, None)
 
     @classmethod
     def __deafult__expand(self, node, transition):
         ret = []
-        if node.state not in transition:
-            return ret
-
-        for s in transition[node.state]:
-            ret.append(State(s.state, s.depth + node.depth))
+        if node.state in transition:
+            for s in transition[node.state]:
+                ret.append(State(s.state, s.depth + node.depth))
         return ret
     
     @classmethod
-    def __astar__condition(self, union, m):
-        for m_s in union:
+    def __astar__condition(self, arr, m):
+        for m_s in arr:
             if m.state == m_s.state:
                 return m_s
         return None
@@ -116,6 +110,6 @@ class Serach:
         heapq.heappush(arr, node)
         return arr
 
+    @classmethod
     def __priority__pop(self, arr):
         return heapq.heappop(arr)
-

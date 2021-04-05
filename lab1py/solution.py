@@ -11,23 +11,26 @@ def print_solution(result, visited, path):
     print(f'[PATH_LENGTH]: {len(path)}')
     print(f'[TOTAL_COST]: {result.depth}')
     
-    #print(heuristics)
     path_str = str(path.pop(0).state)
     for p in path:
         path_str += f' => {p.state}'
     print(f'[PATH]: {path_str}')
-    #print(path)
 
 def check_optimistic(heuristics, final_state, transition):
     is_optimistic = 'is'
+    hstar_dict = {}
+
     for h in sorted(heuristics):
         is_ok = 'ERR'
-        hstar = Serach('ucs').search(h, transition, final_state, heuristics)[0].depth
-        if heuristics[h] <= hstar:
+        
+        if h not in hstar_dict:
+            hstar_dict[h] = Serach('ucs').search(h, transition, final_state, heuristics)[0].depth
+
+        if heuristics[h] <= hstar_dict[h]:
             is_ok = 'OK'
         else:
             is_optimistic = 'is not'
-        print(f'[CONDITION]: [{is_ok}] h({h}) <= h*: {heuristics[h]} <= {float(hstar)}')
+        print(f'[CONDITION]: [{is_ok}] h({h}) <= h*: {heuristics[h]} <= {float(hstar_dict[h])}')
     print(f'[CONCLUSION]: Heuristic {is_optimistic} optimistic.')
 
 def check_consistent(heuristics, transition):
@@ -46,11 +49,13 @@ def check_consistent(heuristics, transition):
 if __name__ == '__main__':
     alg, ss, h, optimistic, consistent = Parser.parse_args(sys.argv[1:])
     start_state, final_state, transition = Parser.parse_state_space_file(ss)
+    
     if h is not None:
         heuristics = Parser.parse_heuristic_value_file(h)
-        for t in transition:
-            for s in transition[t]:
-                s.h = heuristics[t]
+        if alg == 'astar':
+            for t in transition:
+                for s in transition[t]:
+                    s.h = heuristics[s.state]
     else:
         heuristics = None
 
