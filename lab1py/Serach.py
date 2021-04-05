@@ -52,22 +52,27 @@ class Serach:
                         q[path_num] = new_path
 
                     else:
-                        m_s = self.__astar__condition(open_nodes, s)
-                        m_s2 = self.__astar__condition(closed, s)
-                        if m_s == None and m_s2 == None:
-                            open_nodes = insert(open_nodes, s)
-                        else:
-                            if m_s2 != None:
-                                closed.remove(s)
-                                open_nodes = insert(open_nodes, s)
-                            else:
+                        closed.add(node)
+                        m_s = self.__astar__condition(open_nodes, s) 
+                        if m_s != None:
+                            if (m_s.depth) < (s.depth):
                                 continue
+                            else:
+                                open_nodes.remove(m_s)
+                        m_s = self.__astar__condition(closed, s) 
+                        if m_s != None:
+                            if (m_s.depth) < (s.depth):
+                                continue
+                            else:
+                                closed.remove(m_s)
+                                                
                         path_num += 1
                         s.path = node.path = path_num
                         new_path = list(path)
                         new_path.append(s)
                         open_nodes = insert(open_nodes, s)
                         q[path_num] = new_path
+
             closed.add(node)
         return (None, visited, None)
 
