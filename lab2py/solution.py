@@ -11,5 +11,5 @@ if __name__ == "__main__":
         raise AttributeError("Wrong number of input parameters")
 
     sos = dict()
-    Resoltuion.resolution(knowledge, sos)
+    Resoltuion.resolution(knowledge, sos, goal)
     Resoltuion.print_resolution(knowledge, sos, goal)
