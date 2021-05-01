@@ -138,9 +138,6 @@ class Resoltuion:
             if skip == True:
                 continue
 
-            if new == []:
-                return
-
             for n in new:
                 if n not in sos.items():
                     sos[sos_num] = n[0]
