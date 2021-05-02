@@ -1,6 +1,5 @@
 import copy
 
-
 class Resoltuion:
 
     @staticmethod
@@ -83,8 +82,9 @@ class Resoltuion:
     @staticmethod
     def resolution(knowledge, sos, goal):
         knowledge_cpy = copy.deepcopy(knowledge)
+        sos_num = list(knowledge_cpy.items())[-1][0]
+        knowledge_sos_num = sos_num
 
-        sos_num = len(knowledge_cpy)
         goal_disj = len(goal.split(' v '))
         checked = []
 
@@ -109,7 +109,7 @@ class Resoltuion:
                 if r2 in out:
                     continue
 
-                if r2 <= len(knowledge) - goal_disj:
+                if r2 <= knowledge_sos_num - goal_disj:
                     rule2 = knowledge_cpy[r2]
                 else:
                     rule2 = sos[r2]
