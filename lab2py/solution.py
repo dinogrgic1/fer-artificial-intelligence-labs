@@ -8,8 +8,8 @@ if __name__ == "__main__":
     if sys.argv[1] == 'resolution' and len(sys.argv) == 3:
         knowledge, goal = Parser.parse_knowledge_file(sys.argv[2], True)
         sos = dict()
-        Resoltuion.resolution(knowledge, sos, goal)
-        Resoltuion.print_resolution(knowledge, sos, goal)
+        checked, out = Resoltuion.resolution(knowledge, sos, goal)
+        Resoltuion.print_resolution(knowledge, sos, goal, checked, out)
 
     
     elif sys.argv[1] == 'cooking' and len(sys.argv) == 4:
@@ -23,8 +23,8 @@ if __name__ == "__main__":
                 sos = dict()
                 tmp_knowledge = copy.deepcopy(knowledge)
                 Parser.knowledge_add_goal(tmp_knowledge, commands[command])
-                Resoltuion.resolution(tmp_knowledge, sos, joined)
-                Resoltuion.print_resolution(tmp_knowledge, sos, joined)
+                checked, out = Resoltuion.resolution(tmp_knowledge, sos, joined)
+                Resoltuion.print_resolution(tmp_knowledge, sos, joined, checked, out)
             elif command[0] == '+':
                 Parser.knowledge_add_clause(knowledge, commands[command])
                 print(f'Added {joined}')

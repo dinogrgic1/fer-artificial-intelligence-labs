@@ -10,7 +10,7 @@ class Resoltuion:
         return False
 
     @staticmethod
-    def print_resolution(knowledge, sos, goal):
+    def print_resolution(knowledge, sos, goal, checked, out):
         is_true = False
         for rule in knowledge:
             conj = ' v '.join(knowledge[rule])
@@ -18,14 +18,15 @@ class Resoltuion:
         print('===============')
         goal_size = len(goal.split(' v '))
 
+        len_kn = list(knowledge.items())[-1][0]
         for rule in sos.items():
-            if rule[0] - goal_size >= len(knowledge) - 1:
+            if rule[0] - goal_size >= len_kn and rule[0] not in out:
                 if rule[1] == []:
                     conj = 'NIL'
                     is_true = True
                 else:
                     conj = ' v '.join(rule[1])
-                print(f'{rule[0]}. {conj}')
+                print(f'{rule[0]}. {conj} {checked[rule[0]]}')
         print('===============')
 
         if is_true == True:
@@ -86,7 +87,7 @@ class Resoltuion:
         knowledge_sos_num = sos_num
 
         goal_disj = len(goal.split(' v '))
-        checked = []
+        checked = dict()
 
         for i in range(sos_num - goal_disj + 1, sos_num + 1):
             t = knowledge_cpy.pop(i)
@@ -114,14 +115,13 @@ class Resoltuion:
                 else:
                     rule2 = sos[r2]
 
-                if r1 != r2 and (r1, r2) not in checked:
+                if r1 != r2 and (r1, r2) not in checked.items():
                     resolvents = Resoltuion.resolve(rule1, rule2)
                     if resolvents == []:
-                        checked.append(r1)
-                        checked.append(r2)
+                        checked[sos_num] = (r1, r2)
                         sos[sos_num] = []
                         sos_num += 1
-                        return
+                        return checked, out
 
                     elif resolvents != None:
 
@@ -133,7 +133,12 @@ class Resoltuion:
                             continue
 
                         new.append(resolvents)
-                        checked.append((r1, r2))
+                        ss = sos_num
+                         
+                        if ss in checked:
+                            while ss in checked:
+                                ss += 1
+                        checked[ss] = (r1, r2) 
 
             if skip == True:
                 continue
@@ -144,3 +149,4 @@ class Resoltuion:
                     sos_list.append(sos_num)
                     sos_num += 1
             out.extend(Resoltuion.remove_redundant(sos, knowledge_cpy))
+        return checked, out
