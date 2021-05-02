@@ -26,7 +26,7 @@ if __name__ == "__main__":
                 Resoltuion.resolution(tmp_knowledge, sos, joined)
                 Resoltuion.print_resolution(tmp_knowledge, sos, joined)
             elif command[0] == '+':
-                Parser.knowledge_add_goal(knowledge, commands[command])
+                Parser.knowledge_add_clause(knowledge, commands[command])
                 print(f'Added {joined}')
             elif command[0] == '-':
                 Parser.knowledge_remove_clause(knowledge, commands[command])

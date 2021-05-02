@@ -28,7 +28,8 @@ class Parser:
     
     @staticmethod
     def knowledge_add_goal(knowledge, goals):
-        num = len(knowledge) + 1
+        num = list(knowledge.items())[-1][0]
+        num += 1
 
         for lit in goals:
             if lit[0] != '~':
