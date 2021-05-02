@@ -15,6 +15,7 @@ if __name__ == "__main__":
     elif sys.argv[1] == 'cooking' and len(sys.argv) == 4:
         knowledge, goal = Parser.parse_knowledge_file(sys.argv[2], False)
         commands = Parser.parse_input_file(sys.argv[3])
+        Resoltuion.print_knowledge(knowledge)
 
         for command in commands:
             joined = ' v '.join(commands[command])

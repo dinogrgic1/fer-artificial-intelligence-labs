@@ -11,6 +11,20 @@ class Resoltuion:
 
     @staticmethod
     def print_resolution(knowledge, sos, goal, checked, out):
+        
+        sos_list = list(sos.items())
+        goal_item = sos_list[-1]
+
+        in_list = []
+        out_2 = []
+        if(goal_item[1] == []):
+            in_list.append(goal_item[0])
+            while goal_item[0] in checked:
+                goal_item = checked[goal_item[0]]
+                in_list.append(goal_item[0])
+            out_2 = list(set(sos.keys()) - set(in_list))
+        out = out + out_2
+
         is_true = False
         for rule in knowledge:
             conj = ' v '.join(knowledge[rule])
@@ -34,6 +48,14 @@ class Resoltuion:
         else:
             print(f'[CONCLUSION]: {goal} is unknown')
 
+    @staticmethod
+    def print_knowledge(knowledge):
+        print()
+        print('Constructed with knowledge:')
+        for k in knowledge:
+            print(' v '.join(knowledge[k]))
+        print()
+   
     @staticmethod
     def is_redundant(rule1, r1, rule2, r2):
         rs1 = set(rule1)
