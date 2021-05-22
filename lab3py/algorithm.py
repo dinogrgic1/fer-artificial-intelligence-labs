@@ -27,14 +27,12 @@ class ID3():
     max_lvl = math.inf
     final_feature_num = 0
     model = None
+    args = {}
 
     @staticmethod
     def __args__num__(dataset, v):
         values = {}
         for entry in dataset:
-            if v not in entry:
-                return
-            
             if entry[v] not in values:
                 values[entry[v]] = 1
             else:
@@ -48,9 +46,12 @@ class ID3():
         return max(values, key=values.get)
 
     @staticmethod
-    def __dataset_same_feature__(dataset, v):
-        values = ID3.__args__num__(dataset, v)
-        return len(values)
+    def __dataset_same_feature__(dataset, v, y):
+        val = dataset[0][y]
+        for entry in dataset:
+            if entry[y] != v:
+                return False
+        return True
 
     @staticmethod
     def __entropy__(entropy_values, base):
@@ -87,26 +88,23 @@ class ID3():
             v = ID3.__argmax__(D_parent, y)
             return Leaf(v)
         v = ID3.__argmax__(D, y)
-        if X == [] or ID3.__dataset_same_feature__(D, y) <= 1 or lvl > self.max_lvl:
+        if X == [] or ID3.__dataset_same_feature__(D, v, y) == True or lvl > self.max_lvl:
             return Leaf(v)
 
-        max_val = -1
-        max_x = None
+        di = {}
         for x in X:
             val = self.__IG__(D, X, x, y)
-            if val > max_val:
-                max_val = val
-                max_x = x
-            elif val == max_val:
-                if x < max_x:
-                    max_x = x
-        
+            di[x] = val
+        di = collections.OrderedDict(sorted(di.items()))
+        max_x = max(di, key=di.get)
+
         subtrees = []
-        V = ID3.__args__num__(D, max_x)
-        for v in V:
-            tmp_X = copy.deepcopy(X)
-            tmp_X.remove(max_x)
-            t = self.__fit_alg(ID3.__remove_except_feature(D, max_x, v, y), D, tmp_X, y, lvl+1)
+        tmp_X = copy.deepcopy(X)
+        tmp_X.remove(max_x)
+        
+        for v in self.args[max_x]:
+            new_d = ID3.__remove_except_feature(D, max_x, v, y)
+            t = self.__fit_alg(new_d, D, tmp_X, y, lvl+1)
             subtrees.append(Node(v, [t]))
         subtrees.sort()
         n = Node(max_x, subtrees) 
@@ -116,6 +114,16 @@ class ID3():
     def fit(self, D, lvl=math.inf):
         if(lvl != math.inf):
             self.max_lvl = int(lvl)
+
+        for entry in D:
+            for key in entry:
+                if key not in self.args:
+                    s = set()
+                    s.add(entry[key])
+                    self.args[key] = s
+                else:
+                    self.args[key].add(entry[key])
+
         self.final_feature = ID3.__args__num__(D, list(D[0].keys())[-1])
         self.__fit_alg(D, D, list(D[0].keys())[:-1], list(D[0].keys())[-1], 1)
 

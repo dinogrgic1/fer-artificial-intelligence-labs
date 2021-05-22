@@ -26,5 +26,5 @@ class Utils:
         if dataset == None:
             return
 
-        for key in dataset:
-            print(f'{key} -- {dataset[key]}')
+        for entry in dataset:
+            print(entry)
