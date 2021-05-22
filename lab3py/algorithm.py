@@ -1,5 +1,6 @@
 from util import Utils
 
+import collections
 import math
 import copy
 
@@ -27,7 +28,7 @@ class ID3():
     model = None
 
     def __init__(self, dataset, y):
-        self.final_feature_num = len(ID3.__args__num__(dataset, y))
+        self.final_feature = ID3.__args__num__(dataset, y)
 
     @staticmethod
     def __args__num__(dataset, v):
@@ -45,6 +46,7 @@ class ID3():
     @staticmethod
     def __argmax__(dataset, v):
         values = ID3.__args__num__(dataset, v)
+        values = collections.OrderedDict(sorted(values.items()))
         return max(values, key=values.get)
 
     @staticmethod
@@ -57,8 +59,7 @@ class ID3():
         size = sum(entropy_values.values())
         entropy = 0
         
-        for e in entropy_values:
-            
+        for e in entropy_values:          
             entropy += (entropy_values[e] / size) * math.log(entropy_values[e] / size, base)
         entropy = -entropy
         return entropy
@@ -74,21 +75,21 @@ class ID3():
     def __IG__(self, D, X, x, y):
         e_d = ID3.__args__num__(D, y)
         entropy_values = ID3.__args__num__(D, x)
-        entropy = ID3.__entropy__(e_d, self.final_feature_num)
+        entropy = ID3.__entropy__(e_d, len(self.final_feature))
         
         size = sum(entropy_values.values())
         for e in entropy_values:
             dic = ID3.__remove_except_feature(D, x, e, y)
-            tmp = (len(dic) / size) * ID3.__entropy__(ID3.__args__num__(dic, y), self.final_feature_num)
+            tmp = (len(dic) / size) * ID3.__entropy__(ID3.__args__num__(dic, y), len(self.final_feature))
             entropy -= tmp
         return entropy
 
     def fit(self, D, D_parent, X, y):
         if len(D) == 0:
-            v = argmax(D_parent, y)
+            v = ID3.__argmax__(D_parent, y)
             return Leaf(v)
         v = ID3.__argmax__(D, y)
-        if X == [] or ID3.__dataset_same_feature__(D, y) == 1:
+        if X == [] or ID3.__dataset_same_feature__(D, y) <= 1:
             return Leaf(v)
 
         max_val = -1
@@ -98,6 +99,9 @@ class ID3():
             if val > max_val:
                 max_val = val
                 max_x = x
+            elif val == max_val:
+                if x < max_x:
+                    max_x = x
         
         subtrees = []
         V = ID3.__args__num__(D, max_x)
@@ -107,14 +111,68 @@ class ID3():
             t = self.fit(ID3.__remove_except_feature(D, max_x, v, y), D, tmp_X, y)
             subtrees.append(Node(v, [t]))
         subtrees.sort()
-        
+
         n = Node(max_x, subtrees) 
         self.model = n 
         return n
 
-    def predict(self, test_dataset):
-        Utils.print_dataset(test_dataset)
-        return None
+    def predict(self, D, y):
+        dataset = copy.deepcopy(D)
+        confusion_dict = {}
+
+        for f1 in sorted(self.final_feature):
+            for f2 in sorted(self.final_feature):
+                confusion_dict[f'{f1}|{f2}'] = 0
+        
+        predictions = ''
+        correct = 0
+
+        for entry in dataset:
+            entry_cpy = copy.deepcopy(entry)
+            del entry_cpy[y]
+
+            true_value = entry[y]
+            predicted_value = self.predict_recursive(self.model, entry)
+            predictions += f' {predicted_value}'
+            
+            confusion_dict[f'{predicted_value}|{true_value}'] += 1
+            if true_value == predicted_value:
+                correct += 1
+        
+        print(f'[PREDICTIONS]: {predictions}')
+        print(f'[ACCURACY]: {(correct / len(D)):.5f}')
+        print(f'[CONFUSION_MATRIX]:')
+        confusion = ''
+        for f1 in sorted(self.final_feature):
+            for f2 in sorted(self.final_feature):
+                confusion += str(confusion_dict[f'{f2}|{f1}'])
+                confusion += ' '
+            confusion = confusion[:-1]
+            confusion += '\n'
+        confusion = confusion[:-1]
+        print(confusion)
+
+    def predict_recursive(self, node, entry):
+        if isinstance(node, Leaf):
+            return node.value
+
+        value = entry[node.value]
+        for n in node.subtrees:
+            if n.value == value:
+                return self.predict_recursive(n.subtrees[0], entry)
+        
+        # unseen
+        l = {}
+        for n in node.subtrees:            
+            val = self.predict_recursive(n.subtrees[0], entry)
+            if val not in l:
+                l[val] = 1
+            else:
+                l[val] += 1
+
+        l = collections.OrderedDict(sorted(l.items()))
+        v = max(l, key=l.get)
+        return v
 
     def print_recursive_tree(self, node, lvl, strr):
         if isinstance(node, Leaf):
@@ -130,6 +188,6 @@ class ID3():
         for n in node.subtrees:            
             self.print_recursive_tree(n, lvl + 1, strr)
 
-    def print(self):
+    def print_tree(self):
         print('[BRANCHES]:')
         self.print_recursive_tree(self.model, 1, '')
