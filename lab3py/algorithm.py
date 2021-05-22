@@ -24,11 +24,9 @@ class Leaf():
         self.value = value
 
 class ID3():
+    max_lvl = math.inf
     final_feature_num = 0
     model = None
-
-    def __init__(self, dataset, y):
-        self.final_feature = ID3.__args__num__(dataset, y)
 
     @staticmethod
     def __args__num__(dataset, v):
@@ -84,12 +82,12 @@ class ID3():
             entropy -= tmp
         return entropy
 
-    def fit(self, D, D_parent, X, y):
+    def __fit_alg(self, D, D_parent, X, y, lvl):
         if len(D) == 0:
             v = ID3.__argmax__(D_parent, y)
             return Leaf(v)
         v = ID3.__argmax__(D, y)
-        if X == [] or ID3.__dataset_same_feature__(D, y) <= 1:
+        if X == [] or ID3.__dataset_same_feature__(D, y) <= 1 or lvl > self.max_lvl:
             return Leaf(v)
 
         max_val = -1
@@ -108,13 +106,18 @@ class ID3():
         for v in V:
             tmp_X = copy.deepcopy(X)
             tmp_X.remove(max_x)
-            t = self.fit(ID3.__remove_except_feature(D, max_x, v, y), D, tmp_X, y)
+            t = self.__fit_alg(ID3.__remove_except_feature(D, max_x, v, y), D, tmp_X, y, lvl+1)
             subtrees.append(Node(v, [t]))
         subtrees.sort()
-
         n = Node(max_x, subtrees) 
         self.model = n 
         return n
+
+    def fit(self, D, lvl=math.inf):
+        if(lvl != math.inf):
+            self.max_lvl = int(lvl)
+        self.final_feature = ID3.__args__num__(D, list(D[0].keys())[-1])
+        self.__fit_alg(D, D, list(D[0].keys())[:-1], list(D[0].keys())[-1], 1)
 
     def predict(self, D, y):
         dataset = copy.deepcopy(D)
